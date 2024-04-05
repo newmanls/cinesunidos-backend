@@ -1,16 +1,16 @@
 from rest_framework import permissions, viewsets
 
-from .models import Film, Theater
-from .serializers import FilmSerializer, TheaterSerializer
+from .models import Movie, Theatre
+from .serializers import MovieSerializer, TheatreSerializer
 
 
-class FilmViewSet(viewsets.ModelViewSet):
-    queryset = Film.objects.all()
-    serializer_class = FilmSerializer
+class MovieViewSet(viewsets.ModelViewSet):
+    queryset = Movie.objects.all()
+    serializer_class = MovieSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
 
-class TheaterViewSet(viewsets.ModelViewSet):
-    queryset = Theater.objects.all()
-    serializer_class = TheaterSerializer
+class TheatreViewSet(viewsets.ModelViewSet):
+    queryset = Theatre.objects.all()
+    serializer_class = TheatreSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
