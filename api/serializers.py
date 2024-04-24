@@ -4,6 +4,13 @@ from .models import Movie, Showtime, Theatre
 
 
 class MovieSerializer(serializers.ModelSerializer):
+    running_time = serializers.SerializerMethodField()
+
+    def get_running_time(self, obj):
+        hours, minutes = divmod(obj.running_time, 60)
+
+        return f'{hours}h {minutes}m'
+
     class Meta:
         model = Movie
         fields = '__all__'
