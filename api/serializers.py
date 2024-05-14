@@ -18,4 +18,4 @@ class TheatreSerializer(serializers.ModelSerializer):
 class ShowtimeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Showtime
-        fields = ['id', 'format', 'language', 'auditorium', 'time']
+        fields = ['id', 'time', 'auditorium']

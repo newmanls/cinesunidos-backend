@@ -1,3 +1,4 @@
+from collections import defaultdict
 from rest_framework import permissions, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -16,23 +17,18 @@ class MovieViewSet(viewsets.ModelViewSet):
         movie = self.get_object()
         movie_serializer = self.get_serializer(movie)
         showtimes = Showtime.objects.filter(movie=movie)
-        theatres = []
+        theatres = defaultdict(dict)
 
         for showtime in showtimes:
-            theatre = showtime.theatre
-            showtime_data = ShowtimeSerializer(showtime).data
-            theatre_data = TheatreSerializer(theatre).data
-            theatre_data['showtimes'] = [showtime_data]
+            theatre_id = showtime.theatre.name
+            format_id = showtime.format
+            language = showtime.language
 
-            theatre_exists = False
-            for existing_theatre in theatres:
-                if existing_theatre['id'] == theatre.id:
-                    existing_theatre['showtimes'].append(showtime_data)
-                    theatre_exists = True
-                    break
+            if theatre_id not in theatres:
+                theatres[theatre_id] = defaultdict(list)
 
-            if not theatre_exists:
-                theatres.append(theatre_data)
+            theatres[theatre_id][f'{format_id} ({language})'].append(
+                    ShowtimeSerializer(showtime).data)
 
         data = movie_serializer.data
         data['theatres'] = theatres
@@ -50,7 +46,7 @@ class TheatreViewSet(viewsets.ModelViewSet):
         theatre = self.get_object()
         theatre_serializer = self.get_serializer(theatre)
         showtimes = Showtime.objects.filter(
-            theatre=theatre).order_by('movie__id')
+                theatre=theatre).order_by('movie__id')
         movies = []
 
         for showtime in showtimes:
