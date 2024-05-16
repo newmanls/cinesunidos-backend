@@ -1,3 +1,4 @@
+import json
 from collections import defaultdict
 from rest_framework import permissions, viewsets
 from rest_framework.decorators import action
@@ -21,8 +22,8 @@ class MovieViewSet(viewsets.ModelViewSet):
 
         for showtime in showtimes:
             theatre_id = showtime.theatre.name
-            format_id = showtime.format
-            language = showtime.language
+            format_id = showtime.get_format_display()
+            language = showtime.get_language_display()
 
             if theatre_id not in theatres:
                 theatres[theatre_id] = defaultdict(list)
