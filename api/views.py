@@ -35,27 +35,20 @@ class MovieViewSet(viewsets.ModelViewSet):
 
         # Output formatting
         for showtime in showtimes:
-            theatre_id = showtime.theatre.id
-            theatre_name = showtime.theatre.name
-            theatre_address = showtime.theatre.address
+            theatre_data = TheatreSerializer(showtime.theatre).data
             format = showtime.get_format_display()
             language = showtime.get_language_display()
             format_full = f'{format} ({language})'
 
-            # Check if theatre already exists in theatres list
-            theatre_exists = any(theatre['id'] == theatre_id for theatre in theatres)
+            theatre_exists = any(theatre['id'] == theatre_data['id'] for theatre in theatres)
 
             if not theatre_exists:
-                theatre_data = {
-                    'id': theatre_id,
-                    'name': theatre_name,
-                    'address': theatre_address,
-                    'formats': defaultdict(list)
-                }
+                theatre_data['formats'] = defaultdict(list)
+
                 theatres.append(theatre_data)
 
             # Find the theatre in the list
-            theatre_data = next(theatre for theatre in theatres if theatre['id'] == theatre_id)
+            theatre_data = next(theatre for theatre in theatres if theatre['id'] == theatre_data['id'])
 
             # Append showtime data to the formats list of the theatre
             theatre_data['formats'][format_full].append(ShowtimeSerializer(showtime).data)
