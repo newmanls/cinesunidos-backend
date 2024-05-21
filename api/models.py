@@ -13,7 +13,7 @@ class Movie(models.Model):
         max_length=255,
         unique=True
     )
-    original_name = models.CharField(
+    original_title = models.CharField(
         'título original',
         max_length=255
     )
