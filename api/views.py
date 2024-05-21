@@ -68,25 +68,38 @@ class TheatreViewSet(viewsets.ModelViewSet):
     def showtimes(self, request, pk=None):
         theatre = self.get_object()
         theatre_serializer = self.get_serializer(theatre)
-        showtimes = Showtime.objects.filter(
-                theatre=theatre).order_by('movie__id')
+        showtimes = Showtime.objects.filter(theatre=theatre).order_by('movie__id', 'format')
         movies = []
 
-        for showtime in showtimes:
-            movie = showtime.movie
-            showtime_data = ShowtimeSerializer(showtime).data
-            movie_data = MovieSerializer(movie).data
-            movie_data['showtimes'] = [showtime_data]
+        # Query filters query
+        query_date = self.request.query_params.get('date')
+        query_movie_id = self.request.query_params.get('movie_id')
 
-            movie_exists = False
-            for existing_movie in movies:
-                if existing_movie['id'] == movie.id:
-                    existing_movie['showtimes'].append(showtime_data)
-                    movie_exists = True
-                    break
+        if query_date is not None:
+            showtimes = showtimes.filter(time__date=query_date)
+        else:
+            showtimes = showtimes.filter(time__date=datetime.now().date())
+
+        if query_movie_id is not None:
+            showtimes = showtimes.filter(movie__id=query_movie_id)
+
+
+        for showtime in showtimes:
+            movie_data = MovieSerializer(showtime.movie).data
+            format = showtime.get_format_display()
+            language = showtime.get_language_display()
+            format_full = f'{format} ({language})'
+
+            movie_exists = any(movie['id'] == movie_data['id'] for movie in movies)
 
             if not movie_exists:
+                movie_data['formats'] = defaultdict(list)
+
                 movies.append(movie_data)
+
+            movie_data = next(movie for movie in movies if movie['id'] == movie_data['id'])
+            movie_data['formats'][format_full].append(ShowtimeSerializer(showtime).data)
+
 
         data = theatre_serializer.data
         data['movies'] = movies
