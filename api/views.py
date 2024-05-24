@@ -18,7 +18,8 @@ class MovieViewSet(viewsets.ModelViewSet):
     def showtimes(self, request, pk=None):
         movie = self.get_object()
         movie_serializer = self.get_serializer(movie)
-        showtimes = Showtime.objects.filter(movie=movie).order_by('theatre__id', 'format')
+        showtimes = Showtime.objects.filter(
+            movie=movie).order_by('theatre__id', 'format')
         theatres = []
 
         # Query filters
@@ -40,7 +41,8 @@ class MovieViewSet(viewsets.ModelViewSet):
             language = showtime.get_language_display()
             format_full = f'{format} ({language})'
 
-            theatre_exists = any(theatre['id'] == theatre_data['id'] for theatre in theatres)
+            theatre_exists = any(
+                theatre['id'] == theatre_data['id'] for theatre in theatres)
 
             if not theatre_exists:
                 theatre_data['formats'] = defaultdict(list)
@@ -48,10 +50,12 @@ class MovieViewSet(viewsets.ModelViewSet):
                 theatres.append(theatre_data)
 
             # Find the theatre in the list
-            theatre_data = next(theatre for theatre in theatres if theatre['id'] == theatre_data['id'])
+            theatre_data = next(
+                theatre for theatre in theatres if theatre['id'] == theatre_data['id'])
 
             # Append showtime data to the formats list of the theatre
-            theatre_data['formats'][format_full].append(ShowtimeSerializer(showtime).data)
+            theatre_data['formats'][format_full].append(
+                ShowtimeSerializer(showtime).data)
 
         data = movie_serializer.data
         data['theatres'] = theatres
@@ -68,7 +72,8 @@ class TheatreViewSet(viewsets.ModelViewSet):
     def showtimes(self, request, pk=None):
         theatre = self.get_object()
         theatre_serializer = self.get_serializer(theatre)
-        showtimes = Showtime.objects.filter(theatre=theatre).order_by('movie__id', 'format')
+        showtimes = Showtime.objects.filter(
+            theatre=theatre).order_by('movie__id', 'format')
         movies = []
 
         # Query filters query
@@ -83,23 +88,24 @@ class TheatreViewSet(viewsets.ModelViewSet):
         if query_movie_id is not None:
             showtimes = showtimes.filter(movie__id=query_movie_id)
 
-
         for showtime in showtimes:
             movie_data = MovieSerializer(showtime.movie).data
             format = showtime.get_format_display()
             language = showtime.get_language_display()
             format_full = f'{format} ({language})'
 
-            movie_exists = any(movie['id'] == movie_data['id'] for movie in movies)
+            movie_exists = any(movie['id'] == movie_data['id']
+                               for movie in movies)
 
             if not movie_exists:
                 movie_data['formats'] = defaultdict(list)
 
                 movies.append(movie_data)
 
-            movie_data = next(movie for movie in movies if movie['id'] == movie_data['id'])
-            movie_data['formats'][format_full].append(ShowtimeSerializer(showtime).data)
-
+            movie_data = next(
+                movie for movie in movies if movie['id'] == movie_data['id'])
+            movie_data['formats'][format_full].append(
+                ShowtimeSerializer(showtime).data)
 
         data = theatre_serializer.data
         data['movies'] = movies
