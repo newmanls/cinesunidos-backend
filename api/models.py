@@ -105,4 +105,4 @@ class Showtime(models.Model):
         verbose_name_plural = 'funciones'
 
     def __str__(self):
-        return f'{self.movie} ({self.language})'
+        return f'{self.movie} - {self.get_format_display()} ({self.get_language_display()})'
