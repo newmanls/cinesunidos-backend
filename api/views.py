@@ -19,7 +19,7 @@ class MovieViewSet(viewsets.ModelViewSet):
         movie = self.get_object()
         movie_serializer = self.get_serializer(movie)
         showtimes = Showtime.objects.filter(
-            movie=movie).order_by('theatre__id', 'format')
+            movie=movie).order_by('theatre__id', 'format', 'time')
         theatres = []
 
         # Query filters
@@ -73,7 +73,7 @@ class TheatreViewSet(viewsets.ModelViewSet):
         theatre = self.get_object()
         theatre_serializer = self.get_serializer(theatre)
         showtimes = Showtime.objects.filter(
-            theatre=theatre).order_by('movie__id', 'format')
+            theatre=theatre).order_by('movie__id', 'format', 'time')
         movies = []
 
         # Query filters query
