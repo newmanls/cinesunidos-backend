@@ -24,15 +24,19 @@ class MovieViewSet(viewsets.ModelViewSet):
 
         # Query filters
         query_date = self.request.query_params.get('date')
-        query_theatre_id = self.request.query_params.get('theatre_id')
+        query_format = self.request.query_params.getlist('showtime_format')
+        query_theatre_id = self.request.query_params.getlist('theatre_id')
 
-        if query_date is not None:
+        if query_date:
             showtimes = showtimes.filter(time__date=query_date)
         else:
             showtimes = showtimes.filter(time__date=datetime.now().date())
 
-        if query_theatre_id is not None:
-            showtimes = showtimes.filter(theatre__id=query_theatre_id)
+        if query_format:
+            showtimes = showtimes.filter(format__in=query_format)
+
+        if query_theatre_id:
+            showtimes = showtimes.filter(theatre__id__in=query_theatre_id)
 
         # Output formatting
         for showtime in showtimes:
@@ -78,16 +82,17 @@ class TheatreViewSet(viewsets.ModelViewSet):
 
         # Query filters query
         query_date = self.request.query_params.get('date')
-        query_movie_id = self.request.query_params.get('movie_id')
+        query_format = self.request.query_params.getlist('showtime_format')
 
-        if query_date is not None:
+        if query_date:
             showtimes = showtimes.filter(time__date=query_date)
         else:
             showtimes = showtimes.filter(time__date=datetime.now().date())
 
-        if query_movie_id is not None:
-            showtimes = showtimes.filter(movie__id=query_movie_id)
+        if query_format:
+            showtimes = showtimes.filter(format__in=query_format)
 
+        # Output formatting
         for showtime in showtimes:
             movie_data = MovieSerializer(showtime.movie).data
             format = showtime.get_format_display()
